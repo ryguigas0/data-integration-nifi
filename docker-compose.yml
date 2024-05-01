@@ -1,16 +1,52 @@
-version: "1"
+version: '3'
 name: nifi-compose
 
+volumes:
+  vol1:
+    driver: local
+
 services:
- nifi:
-  container_name: nifi
-  image: apache/nifi:latest
-  restart: unless-stopped
-  volumes:
-   - /nifi:/nifi
-  ports:
-   - "8080:8080"
-  environment:
-   - NIFI_WEB_HTTP_PORT=8080
-   - SINGLE_USER_CREDENTIALS_USERNAME=admin
-   - SINGLE_USER_CREDENTIALS_PASSWORD=senha123456789
+  nifi:
+    container_name: nifi
+    image: apache/nifi:latest
+    restart: unless-stopped
+    volumes:
+      - /nifi:/nifi
+    ports:
+      - "8080:8080"
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=senha123456789
+    depends_on:
+      - elastic
+  elastic:
+    container_name: elasticsearch
+    image: elasticsearch:7.6.1
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      # limitando a memória da JVM
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # coloca para distribuir pra só um nodo
+      - discovery.type=single-node
+    # limites de uso de recorsos
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - vol1:/usr/share/elasticsearch/data
+  kibana:
+    container_name: kibana
+    image: kibana:7.6.1
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - SERVER_NAME=kibana.local
+      - ELASTICSEARCH_URL=http://elastic:9200
+    depends_on:
+      - elastic
