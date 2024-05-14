@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 name: nifi-compose
 
 volumes:
@@ -11,7 +11,7 @@ services:
     image: apache/nifi:latest
     restart: unless-stopped
     volumes:
-      - /nifi:/nifi
+      - /home/ryguigas/dev/espm/nifi-compose/nifi:/nifi
     ports:
       - "8080:8080"
     environment:
@@ -50,3 +50,24 @@ services:
       - ELASTICSEARCH_URL=http://elastic:9200
     depends_on:
       - elastic
+  postgres:
+    container_name: postgres
+    image: postgres:12.18-alpine3.19
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=assignment
+      - PGDATA=/data/postgres
+    restart: unless-stopped
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - "80:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    depends_on:
+      - postgres
