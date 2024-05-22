@@ -1,5 +1,4 @@
-version: '3.8'
-name: nifi-compose
+version: '3.3'
 
 volumes:
   vol1:
@@ -11,7 +10,7 @@ services:
     image: apache/nifi:latest
     restart: unless-stopped
     volumes:
-      - /home/ryguigas/dev/espm/nifi-compose/nifi:/nifi
+      - /etc/nifi-compose/nifi:/nifi
     ports:
       - "8080:8080"
     environment:
